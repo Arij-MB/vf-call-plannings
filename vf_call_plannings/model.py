@@ -32,15 +32,16 @@ class Maranfleet(models.Model):
 
 
 class R4s_ports(models.Model):
-    name = models.TextField(max_length=255, null=False)
-    country_id = models.CharField(max_length=255)
-    un_locode = models.CharField(max_length=255)
-    latitude = models.CharField(max_length=255)
-    longitude = models.CharField(max_length=255)
-    psc_id = models.CharField(max_length=255)
-    corresponding_un_locode = models.CharField(max_length=255)
-    created_at = models.CharField(max_length=255)
-    updated_at = models.CharField(max_length=255)
+    name = models.TextField(max_length=255)
+    #country = models.TextField(max_length=255)
+    un_locode = models.TextField(max_length=255)
+    latitude = models.TextField(max_length=255)
+    longitude = models.TextField(max_length=255)
+    # psc_id = models.CharField(max_length=255)
+    #corresponding_un_locode = models.TextField(max_length=255)
+    #reporting_MoU = models.TextField(max_length=255)
+    # created_at = models.CharField(max_length=255)
+    # updated_at = models.CharField(max_length=255)
 
     class Meta:
         db_table = 'r4s_ports'
@@ -49,10 +50,10 @@ class R4s_ports(models.Model):
 class Vf_call_plannings(models.Model):
     id = models.AutoField(primary_key=True)
     ship_imo = models.TextField(max_length=7, null=False)
-    date = models.TextField(max_length=30, null=False)
+    date = models.DateField(null=False)
     port_name = models.TextField(max_length=255, null=False)
-    port_country = models.TextField(max_length=30, null=False)
-    port_unlocode = models.TextField(max_length=6, null=False)
+    # port_country = models.TextField(max_length=30, null=False)
+    port_unlocode = models.TextField(max_length=5, null=False)
 
     class Meta:
         db_table = 'vf_call_plannings'
