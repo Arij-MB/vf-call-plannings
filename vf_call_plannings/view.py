@@ -1,13 +1,16 @@
 from datetime import datetime
-from .model import Maranfleet, Maran_error_report, R4s_ports, Vf_call_plannings
+from .model import Maranfleet, Maran_error_report, R4s_ports, Vf_call_plannings, Fleet_vt
 from django.db import connection
 
 
 def maran_check():
     Maran_error_report.objects.all().delete()
-    # Truncate the Maran_error_report table
     with connection.cursor() as cursor:
         cursor.execute("TRUNCATE TABLE maran_error_report;")
+
+    Vf_call_plannings.objects.all().delete()
+    with connection.cursor() as cursor:
+        cursor.execute("TRUNCATE TABLE vf_call_plannings;")
 
     # Retrieve the most recent Maranfleet object for each unique IMO number and port combination in the db
     for imo, port in Maranfleet.objects.order_by('-date_of_scrapping').values_list('imo', 'port').distinct():
@@ -61,6 +64,8 @@ def maran_check():
         # case 3*   (port <>NULL) && (action == ETA)
         elif maran.port != 'NULL' and maran.action == 'ETA':
             ports = R4s_ports.objects.filter(name__icontains=maran.port.strip())
+            fleets = Fleet_vt.objects.filter(sid__iexact=maran.imo.strip())
+            fleet_name = fleets.first().fleetname
             # print('Processing case 3...')
             if ports.exists():
                 # port = ports.first().name
@@ -68,6 +73,7 @@ def maran_check():
                 Vf_call_plannings.objects.update_or_create(
                     ship_imo=maran.imo,
                     defaults={
+                        'fleet_name': fleet_name,
                         'date': date_obj,
                         'port_name': maran.port,
                         'port_unlocode': unlocode
@@ -95,9 +101,12 @@ def maran_check():
             # print('Processing case else...')
             if maran.action != 'ATA':
                 if maran.action == 'ETA':
+                    fleets = Fleet_vt.objects.filter(sid__iexact=maran.imo.strip())
+                    fleet_name = fleets.first().fleetname
                     Vf_call_plannings.objects.update_or_create(
                         ship_imo=maran.imo,
                         defaults={
+                            'fleet_name': fleet_name,
                             'date': date_obj,
                             'port_name': maran.port,
                             'port_unlocode': maran.unlocode
